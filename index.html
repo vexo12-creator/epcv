@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeXo SaaS - Ko'p Tarmoqli Biznes Boshqaruv Tizimi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-body); 
+            margin: 0; 
+            padding: 30px 20px; 
+            color: var(--text-main);
+        }
+
+        .container { max-width: 1280px; margin: 0 auto; }
+        
+        header { margin-bottom: 35px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        header h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; display: flex; align-items: center; gap: 10px; }
+        header p { color: var(--text-muted); margin: 0; font-size: 15px; }
+
+        /* Kasb tanlash oynasi (Modal) */
+        .setup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+        .setup-card { background: white; padding: 40px; border-radius: 24px; max-width: 750px; width: 90%; text-align: center; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
+        @media(max-width: 650px) { .setup-grid { grid-template-columns: 1fr 1fr; } }
+        @media(max-width: 450px) { .setup-grid { grid-template-columns: 1fr; } }
+        .type-btn { border: 2px solid var(--border); padding: 20px; border-radius: 16px; cursor: pointer; background: white; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .type-btn:hover { border-color: var(--primary); background: #f5f3ff; transform: translateY(-2px); }
+        .type-btn i { width: 28px; height: 28px; color: var(--primary); }
+        .type-btn span { font-weight: 600; font-size: 14px; color: var(--text-main); }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 30px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px; }
+        @media(max-width: 968px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+
+        .stat-card { 
+            background: var(--bg-card); 
+            padding: 24px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .stat-info h4 { margin: 0; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-num { font-size: 26px; font-weight: 700; margin-top: 8px; display: block; }
+        .stat-icon { padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
+
+        .card { 
+            background: var(--bg-card); 
+            padding: 24px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border);
+        }
+        .card h2 { font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); }
+        
+        input, select { 
+            width: 100%; 
+            padding: 11px 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+            font-family: inherit;
+            transition: all 0.2s;
+            background-color: #fff;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 8px;
+            font-weight: 600; 
+            font-size: 14px;
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+        button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #059669; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-action-icon { width: auto; padding: 6px; border-radius: 6px; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); width: auto; padding: 8px 15px; }
+        .btn-outline:hover { background: #f1f5f9; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f8fafc; color: var(--text-muted); font-weight: 600; }
+        tr:hover { background-color: #f8fafc; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-role { background-color: #eef2ff; color: var(--primary); }
+        .badge-category { background-color: #fef3c7; color: var(--warning); }
+        .badge-type { background: #e0e7ff; color: var(--primary); font-size: 14px; padding: 6px 16px; border-radius: 30px; display: flex; align-items: center; gap: 6px; }
+        
+        .sub-title { font-size: 15px; font-weight: 600; margin: 25px 0 10px 0; color: var(--text-muted); }
+        .flex-actions { display: flex; gap: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="setup-overlay" id="setup-modal" style="display: none;">
+    <div class="setup-card">
+        <h2 style="margin:0 0 10px 0; font-size: 24px;">Xush kelibsiz! 👋</h2>
+        <p style="color: var(--text-muted); margin:0;">Tizimni sizning sohangizga moslashtirish uchun kasbingiz/biznesingiz turini tanlang:</p>
+        
+        <div class="setup-grid">
+            <button class="type-btn" onclick="selectBusinessType('shop')">
+                <i data-lucide="shopping-bag"></i>
+                <span>Do'kon (Savdo)</span>
+            </button>
+            <button class="type-btn" onclick="selectBusinessType('cafe')">
+                <i data-lucide="utensils"></i>
+                <span>Kafe / Restoran</span>
+            </button>
+            <button class="type-btn" onclick="selectBusinessType('beauty')">
+                <i data-lucide="scissors"></i>
+                <span>Go'zallik saloni</span>
+            </button>
+            <button class="type-btn" onclick="selectBusinessType('edu')">
+                <i data-lucide="graduation-cap"></i>
+                <span>O'quv markazi</span>
+            </button>
+            <button class="type-btn" onclick="selectBusinessType('auto')">
+                <i data-lucide="wrench"></i>
+                <span>Avtoservis / Avtoyuvish</span>
+            </button>
+            <button class="type-btn" onclick="selectBusinessType('pharma')">
+                <i data-lucide="pill"></i>
+                <span>Dorixona (Apteka)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <header>
+        <div>
+            <h1><i data-lucide="trending-up" style="color: var(--primary)"></i> Biznes Boshqaruv Tizimi <span style="font-size: 14px; font-weight: 500; background: #e0e7ff; color: var(--primary); padding: 2px 8px; border-radius: 20px; margin-left: 10px;">SaaS Pro</span></h1>
+            <p>Moliyaviy nazorat, operatsion xarajatlar va real vaqt tahlili.</p>
+        </div>
+        <div class="badge-type">
+            <i data-lucide="briefcase" style="width:16px; height:16px;"></i>
+            <span id="business-type-badge">Yuklanmoqda...</span>
+            <button class="btn-outline" style="padding: 2px 8px; font-size: 11px; margin-left:5px;" onclick="resetBusinessType()">O'zgartirish</button>
+        </div>
+    </header>
+    
+    <div class="grid-3">
+        <div class="stat-card">
+            <div class="stat-info">
+                <h4>Umumiy Tushum</h4>
+                <span id="total-sales" class="stat-num">0 so'm</span>
+            </div>
+            <div class="stat-icon" style="background-color: var(--success);"><i data-lucide="dollar-sign"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <h4>Jami Xarajatlar & Oylik</h4>
+                <span id="total-expenses" class="stat-num">0 so'm</span>
+            </div>
+            <div class="stat-icon" style="background-color: var(--danger);"><i data-lucide="credit-card"></i></div>
+        </div>
+        <div class="stat-card" id="profit-card">
+            <div class="stat-info">
+                <h4>Sof Foyda</h4>
+                <span id="clean-profit" class="stat-num">0 so'm</span>
+            </div>
+            <div class="stat-icon" id="profit-icon-bg" style="background-color: var(--primary);"><i data-lucide="pie-chart"></i></div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2 id="block1-title"><i data-lucide="package-plus" style="color: var(--primary)"></i> Kirim qilish</h2>
+            
+            <div class="form-group">
+                <label id="lbl-prod-name">Nomi</label>
+                <input type="text" id="prod-name" placeholder="Kiritish...">
+            </div>
+
+            <div class="grid-2" style="margin-bottom:0; gap:12px;">
+                <div class="form-group">
+                    <label id="lbl-prod-cost">Tannarxi / Xarajati</label>
+                    <input type="number" id="prod-cost" placeholder="Summa">
+                </div>
+                <div class="form-group">
+                    <label id="lbl-prod-price">Sotish narxi / Kurs narxi</label>
+                    <input type="number" id="prod-price" placeholder="Summa">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label id="lbl-prod-qty">Miqdori / Joylar soni</label>
+                <input type="number" id="prod-qty" placeholder="Soni">
+            </div>
+
+            <button onclick="addProduct()"><i data-lucide="plus-circle"></i> <span id="btn-add-text">Tizimga qo'shish</span></button>
+        </div>
+
+        <div class="card">
+            <h2 id="block2-title"><i data-lucide="shopping-cart" style="color: var(--success)"></i> Kassa va Savdo</h2>
+            
+            <div class="form-group" id="dynamic-extra-field" style="display: none;">
+                <label id="lbl-extra-select">Qo'shimcha ma'lumot</label>
+                <select id="extra-select-val">
+                    </select>
+            </div>
+
+            <div class="form-group">
+                <label id="lbl-sell-select">Tanlang</label>
+                <select id="sell-select"><option value="">-- Tanlang --</option></select>
+            </div>
+            
+            <div class="form-group">
+                <label id="lbl-sell-qty">Sotiladigan miqdor / Mijozlar soni</label>
+                <input type="number" id="sell-qty" placeholder="Soni kiriting">
+            </div>
+
+            <button class="btn-success" onclick="sellProduct()"><i data-lucide="check-square"></i> <span id="btn-sell-text">Kassaga urish</span></button>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2><i data-lucide="users" style="color: #6366f1"></i> Ishchilar va Oyliklar</h2>
+            <div class="form-group">
+                <label>Xodim Ismi va Familiyasi</label>
+                <input type="text" id="staff-name" placeholder="Ism-sharif kiriting">
+            </div>
+            <div class="grid-2" style="margin-bottom:0; gap:12px;">
+                <div class="form-group">
+                    <label>Lavozimi / Mutaxassisligi</label>
+                    <input type="text" id="staff-role" placeholder="Masalan: Sotuvchi, Shifokor, Usta">
+                </div>
+                <div class="form-group">
+                    <label>Oylik maoshi (so'mda)</label>
+                    <input type="number" id="staff-salary" placeholder="Maosh summasi">
+                </div>
+            </div>
+            <button onclick="addStaff()"><i data-lucide="user-plus"></i> Yangi xodim qo'shish</button>
+            
+            <div class="sub-title">Xodimlar Ro'yxati</div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>Ismi</th><th>Lavozimi</th><th>Oyligi</th><th>Amal</th></tr>
+                    </thead>
+                    <tbody id="staff-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i data-lucide="wallet" style="color: var(--danger)"></i> Operatsion Xarajatlar</h2>
+            <div class="form-group">
+                <label>Xarajat turi (Kategoriya)</label>
+                <select id="exp-category">
+                    <option value="Ijara">Do'kon/Bino Ijarasi</option>
+                    <option value="Kommunal">Kommunal (Svet, Gaz, Suv, Internet)</option>
+                    <option value="Reklama">Target va Reklama xarajatlari</option>
+                    <option value="Logistika">Dostavka / Transport xarajatlari</option>
+                    <option value="Xom-ashyo">Xaridlar / Jihozlar / Masalliqlar</option>
+                    <option value="Boshqa">Kutilmagan boshqa xarajatlar</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Xarajat summasi</label>
+                <input type="number" id="exp-amount" placeholder="Summani yozing">
+            </div>
+            <div class="form-group">
+                <label>Izoh / Batafsil</label>
+                <input type="text" id="exp-comment" placeholder="Batafsil izoh">
+            </div>
+            <button class="btn-danger" onclick="addExpense()"><i data-lucide="minus-circle"></i> Xarajatni tasdiqlash</button>
+            
+            <div class="sub-title">Oxirgi tasdiqlangan xarajatlar</div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>Kategoriya</th><th>Summa</th><th>Izoh</th><th>Amal</th></tr>
+                    </thead>
+                    <tbody id="expense-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><i data-lucide="layers" style="color: var(--primary)"></i> <span id="inventory-table-title">Mavjud Ro'yxat</span></h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Nomi / Xizmat turi</th><th>Tannarxi / Xarajati</th><th>Sotish / To'lov narxi</th><th>Qoldiq / Bo'sh joy</th><th>Amal</th></tr>
+                </thead>
+                <tbody id="inventory-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script>
+    // Biznes turi (shop, cafe, beauty, edu, auto, pharma)
+    let currentBusinessType = localStorage.getItem('erp_biz_type') || null;
+
+    // Ma'lumotlar bazasi
+    let inventory = JSON.parse(localStorage.getItem('erp_inventory')) || [];
+    let staffList = JSON.parse(localStorage.getItem('erp_staffList')) || [];
+    let expenses = JSON.parse(localStorage.getItem('erp_expenses')) || [];
+    let totalSalesRevenue = parseFloat(localStorage.getItem('erp_totalSales')) || 0;
+    let grossProfit = parseFloat(localStorage.getItem('erp_grossProfit')) || 0;
+
+    function showNotify(text, type = "success") {
+        Toastify({
+            text: text,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: type === "success" ? "#10b981" : "#ef4444",
+                borderRadius: "10px",
+                fontWeight: "600"
+            }
+        }).showToast();
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('erp_inventory', JSON.stringify(inventory));
+        localStorage.setItem('erp_staffList', JSON.stringify(staffList));
+        localStorage.setItem('erp_expenses', JSON.stringify(expenses));
+        localStorage.setItem('erp_totalSales', totalSalesRevenue);
+        localStorage.setItem('erp_grossProfit', grossProfit);
+        localStorage.setItem('erp_biz_type', currentBusinessType);
+    }
+
+    function selectBusinessType(type) {
+        currentBusinessType = type;
+        document.getElementById('setup-modal').style.display = 'none';
+        saveToStorage();
+        applyBusinessTheme();
+        updateDashboard();
+        showNotify("Tizim siz tanlagan sohaga moslashtirildi!");
+    }
+
+    function resetBusinessType() {
+        if(confirm("Kasb turini o'zgartirsangiz joriy ro'yxat saqlanadi, ammo ko'rinish va nomlar o'zgaradi. Davom etamizmi?")) {
+            document.getElementById('setup-modal').style.display = 'flex';
+        }
+    }
+
+    // Har bir kasb turiga qarab matnlarni o'zgartirish funksiyasi
+    function applyBusinessTheme() {
+        if (!currentBusinessType) {
+            document.getElementById('setup-modal').style.display = 'flex';
+            lucide.createIcons();
+            return;
+        }
+
+        const badge = document.getElementById('business-type-badge');
+        const extraField = document.getElementById('dynamic-extra-field');
+        const lblExtra = document.getElementById('lbl-extra-select');
+        const extraSelect = document.getElementById('extra-select-val');
+        
+        const b1Title = document.getElementById('block1-title');
+        const b2Title = document.getElementById('block2-title');
+        const lblName = document.getElementById('lbl-prod-name');
+        const lblCost = document.getElementById('lbl-prod-cost');
+        const lblPrice = document.getElementById('lbl-prod-price');
+        const lblQty = document.getElementById('lbl-prod-qty');
+        const btnAdd = document.getElementById('btn-add-text');
+        const btnSell = document.getElementById('btn-sell-text');
+        const tableTitle = document.getElementById('inventory-table-title');
+
+        extraField.style.display = 'none';
+
+        if (currentBusinessType === 'shop') {
+            badge.innerText = "Do'kon (Savdo)";
+            b1Title.innerHTML = `<i data-lucide="package-plus"></i> Omborga Tovar Qo'shish`;
+            b2Title.innerHTML = `<i data-lucide="shopping-cart"></i> Kassa (Savdo qilish)`;
+            lblName.innerText = "Mahsulot nomi";
+            lblCost.innerText = "Kelish narxi (tannarxi)";
+            lblPrice.innerText = "Sotish narxi";
+            lblQty.innerText = "Mavjud miqdor (Soni)";
+            btnAdd.innerText = "Omborga joylash";
+            btnSell.innerText = "Sotish (Chek urish)";
+            tableTitle.innerText = "📦 Ombordagi Qoldiq Mahsulotlar";
+
+        } else if (currentBusinessType === 'cafe') {
+            badge.innerText = "Kafe / Restoran";
+            extraField.style.display = 'block';
+            lblExtra.innerText = "Stol raqami";
+            extraSelect.innerHTML = `<option value="Stol #1">Stol #1</option><option value="Stol #2">Stol #2</option><option value="Stol #3">Stol #3</option><option value="Olib ketish">Olib ketish (Takeaway)</option>`;
+            
+            b1Title.innerHTML = `<i data-lucide="soup"></i> Menyuga Taom Qo'shish`;
+            b2Title.innerHTML = `<i data-lucide="receipt"></i> Buyurtma Olish (Kassa)`;
+            lblName.innerText = "Taom / Ichimlik nomi";
+            lblCost.innerText = "Masalliqlar xarajati (Tannarx)";
+            lblPrice.innerText = "Menyudagi narxi";
+            lblQty.innerText = "Tayyor porsiya soni";
+            btnAdd.innerText = "Menyuga kiritish";
+            btnSell.innerText = "Buyurtmani yakunlash";
+            tableTitle.innerText = "🍲 Menyudagi Taomlar va Qoldiq Porsiyalar";
+
+        } else if (currentBusinessType === 'beauty') {
+            badge.innerText = "Go'zallik saloni";
+            extraField.style.display = 'block';
+            lblExtra.innerText = "Xizmat ko'rsatuvchi usta";
+            extraSelect.innerHTML = `<option value="Usta Behruz">Usta Behruz</option><option value="Usta Malika">Usta Malika</option><option value="Usta Shahlo">Usta Shahlo</option>`;
+            
+            b1Title.innerHTML = `<i data-lucide="sparkles"></i> Xizmat Turlarini Qo'shish`;
+            b2Title.innerHTML = `<i data-lucide="user-check"></i> Mijoz Qabul Qilish`;
+            lblName.innerText = "Xizmat nomi (Masalan: Soch kesish, Makiyaj)";
+            lblCost.innerText = "Ishlatiladigan material xarajati";
+            lblPrice.innerText = "Xizmat haqi narxi";
+            lblQty.innerText = "Kunlik qabul limiti (Mijoz soni)";
+            btnAdd.innerText = "Xizmatni ro'yxatga qo'shish";
+            btnSell.innerText = "Xizmatni yakunlash (To'lov)";
+            tableTitle.innerText = "💅 Salon Xizmatlari va Narxlari";
+
+        } else if (currentBusinessType === 'edu') {
+            badge.innerText = "O'quv markazi";
+            b1Title.innerHTML = `<i data-lucide="book-open"></i> Yangi Kurs / Guruh Qo'shish`;
+            b2Title.innerHTML = `<i data-lucide="wallet"></i> Talabalardan To'lov Olish`;
+            lblName.innerText = "Kurs / Fan nomi (Masalan: English IELTS)";
+            lblCost.innerText = "O'qituvchi haqi / Xona xarajati (bitta talabadan)";
+            lblPrice.innerText = "Kursning oylik to'lov narxi";
+            lblQty.innerText = "Guruhdagi bo'sh joylar soni";
+            btnAdd.innerText = "Kursni ochish";
+            btnSell.innerText = "To'lovni qabul qilish";
+            tableTitle.innerText = "📚 Mavjud Kurslar va Guruhlar Ro'yxati";
+
+        } else if (currentBusinessType === 'auto') {
+            badge.innerText = "Avtoservis / Avtoyuvish";
+            extraField.style.display = 'block';
+            lblExtra.innerText = "Boks / Joy";
+            extraSelect.innerHTML = `<option value="Boks #1">Boks #1 (Slesar)</option><option value="Boks #2">Boks #2 (Yuvish)</option><option value="Boks #3">Boks #3 (Elektrik)</option>`;
+            
+            b1Title.innerHTML = `<i data-lucide="disc"></i> Xizmat yoki Zapchast Qo'shish`;
+            b2Title.innerHTML = `<i data-lucide="car"></i> Avtomobilga Xizmat Ko'rsatish`;
+            lblName.innerText = "Xizmat yoki Ehtiyot qism nomi";
+            lblCost.innerText = "Tannarxi / Zapchast kelish narxi";
+            lblPrice.innerText = "Mijozga sotish / Xizmat narxi";
+            lblQty.innerText = "Zapchast soni yoki Kunlik limit";
+            btnAdd.innerText = "Servis bazasiga qo'shish";
+            btnSell.innerText = "Xizmatni tugatish va Pul olish";
+            tableTitle.innerText = "🔧 Servis Xizmatlari va Ehtiyot Qismlar";
+
+        } else if (currentBusinessType === 'pharma') {
+            badge.innerText = "Dorixona (Apteka)";
+            b1Title.innerHTML = `<i data-lucide="package"></i> Dorilar Kirimi`;
+            b2Title.innerHTML = `<i data-lucide="shopping-bag"></i> Dori Sotish (Kassa)`;
+            lblName.innerText = "Dori vositasi nomi (Qadog'i bilan)";
+            lblCost.innerText = "Firmadan kelgan narxi (Tannarx)";
+            lblPrice.innerText = "Sotish chakana narxi";
+            lblQty.innerText = "Qadoqlar soni (Dona)";
+            btnAdd.innerText = "Dorini vitrinaga qo'shish";
+            btnSell.innerText = "Dori sotish (Chek)";
+            tableTitle.innerText = "💊 Dorixonadagi Mavjud Dorilar Qoldig'i";
+        }
+        lucide.createIcons();
+    }
+
+    function updateDashboard() {
+        saveToStorage();
+
+        const invTable = document.getElementById('inventory-table');
+        const sellSelect = document.getElementById('sell-select');
+        invTable.innerHTML = '';
+        sellSelect.innerHTML = '<option value="">-- Tanlang --</option>';
+        
+        inventory.forEach((item, index) => {
+            invTable.innerHTML += `<tr>
+                <td><strong>${item.name}</strong></td>
+                <td>${parseInt(item.cost).toLocaleString()} so'm</td>
+                <td>${parseInt(item.price).toLocaleString()} so'm</td>
+                <td><span class="badge" style="background:#e2e8f0; color:#334155">${item.qty} ta/joy</span></td>
+                <td><button class="btn-danger btn-action-icon" onclick="deleteProduct(${index})"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></button></td>
+            </tr>`;
+            if(item.qty > 0) {
+                sellSelect.innerHTML += `<option value="${index}">${item.name} (${item.qty} ta mavjud)</option>`;
+            }
+        });
+
+        // Xodimlar jadvali
+        const staffTable = document.getElementById('staff-table');
+        staffTable.innerHTML = '';
+        staffList.forEach((staff, index) => {
+            staffTable.innerHTML += `<tr>
+                <td><strong>${staff.name}</strong></td>
+                <td><span class="badge badge-role">${staff.role}</span></td>
+                <td>${parseInt(staff.salary).toLocaleString()} so'm</td>
+                <td>
+                    <div class="flex-actions">
+                        <button class="btn-success btn-action-icon" style="padding:4px 10px; font-size:12px;" onclick="paySalary(${index})">Oylik Berish</button>
+                        <button class="btn-danger btn-action-icon" onclick="deleteStaff(${index})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+
+        // Xarajatlar jadvali
+        const expTable = document.getElementById('expense-table');
+        expTable.innerHTML = '';
+        let totalOtherExpenses = 0;
+        expenses.forEach((exp, index) => {
+            totalOtherExpenses += exp.amount;
+            expTable.innerHTML += `<tr>
+                <td><span class="badge badge-category">${exp.category}</span></td>
+                <td style="color:var(--danger); font-weight:600;">-${parseInt(exp.amount).toLocaleString()} so'm</td>
+                <td style="color:var(--text-muted);">${exp.comment}</td>
+                <td><button class="btn-danger btn-action-icon" onclick="deleteExpense(${index})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></td>
+            </tr>`;
+        });
+
+        // Moliyaviy hisobotlar
+        let finalCleanProfit = grossProfit - totalOtherExpenses;
+
+        document.getElementById('total-sales').innerText = parseInt(totalSalesRevenue).toLocaleString() + " so'm";
+        document.getElementById('total-expenses').innerText = parseInt(totalOtherExpenses).toLocaleString() + " so'm";
+        document.getElementById('clean-profit').innerText = parseInt(finalCleanProfit).toLocaleString() + " so'm";
+        
+        const profitCard = document.getElementById('profit-card');
+        const profitIconBg = document.getElementById('profit-icon-bg');
+        if(finalCleanProfit < 0) {
+            profitCard.style.borderLeft = "5px solid var(--danger)";
+            profitIconBg.style.backgroundColor = "var(--danger)";
+        } else {
+            profitCard.style.borderLeft = "1px solid var(--border)";
+            profitIconBg.style.backgroundColor = "var(--primary)";
+        }
+
+        lucide.createIcons();
+    }
+
+    // Amallar: Element qo'shish
+    function addProduct() {
+        const name = document.getElementById('prod-name').value.trim();
+        const cost = parseFloat(document.getElementById('prod-cost').value);
+        const price = parseFloat(document.getElementById('prod-price').value);
+        const qty = parseInt(document.getElementById('prod-qty').value);
+
+        if(!name || isNaN(cost) || isNaN(price) || isNaN(qty)) {
+            return showNotify("Iltimos, hamma maydonlarni to'g'ri to'ldiring!", "error");
+        }
+
+        inventory.push({ name, cost, price, qty });
+        showNotify("Muvaffaqiyatli qo'shildi!");
+        updateDashboard();
+        
+        document.getElementById('prod-name').value = ''; document.getElementById('prod-cost').value = '';
+        document.getElementById('prod-price').value = ''; document.getElementById('prod-qty').value = '';
+    }
+
+    // Amallar: Sotish / Tranzaksiya
+    function sellProduct() {
+        const index = document.getElementById('sell-select').value;
+        const qty = parseInt(document.getElementById('sell-qty').value);
+
+        if(index === "" || isNaN(qty) || qty <= 0) return showNotify("To'g'ri tanlov va miqdorni kiriting!", "error");
+        
+        let prod = inventory[index];
+        if(qty > prod.qty) return showNotify("Ro'yxatda yetarli qoldiq/joy mavjud emas!", "error");
+
+        prod.qty -= qty;
+        let revenue = qty * prod.price;
+        let costPrice = qty * prod.cost;
+        
+        totalSalesRevenue += revenue;
+        grossProfit += (revenue - costPrice);
+
+        let extraText = "";
+        const extraField = document.getElementById('dynamic-extra-field');
+        if(extraField.style.display !== 'none') {
+            extraText = ` (${document.getElementById('extra-select-val').value})`;
+        }
+
+        showNotify(`Kassa tasdiqlandi! Tushum: ${parseInt(revenue).toLocaleString()} so'm${extraText}`);
+        updateDashboard();
+        document.getElementById('sell-qty').value = '';
+    }
+
+    // Amallar: Ishchi qo'shish
+    function addStaff() {
+        const name = document.getElementById('staff-name').value.trim();
+        const role = document.getElementById('staff-role').value.trim();
+        const salary = parseFloat(document.getElementById('staff-salary').value);
+
+        if(!name || !role || isNaN(salary)) return showNotify("Ishchi ma'lumotlarini to'liq kiriting!", "error");
+        
+        staffList.push({ name, role, salary });
+        showNotify(`Xodim ${name} tizimga qo'shildi.`);
+        updateDashboard();
+
+        document.getElementById('staff-name').value = ''; document.getElementById('staff-role').value = ''; document.getElementById('staff-salary').value = '';
+    }
+
+    // Amallar: Oylik berish
+    function paySalary(index) {
+        let staff = staffList[index];
+        expenses.push({
+            category: "Ishchi Oyligi",
+            amount: staff.salary,
+            comment: `${staff.name}ga (${staff.role}) oylik berildi.`
+        });
+        showNotify(`${staff.name}ga oylik to'landi!`);
+        updateDashboard();
+    }
+
+    // Amallar: Xarajat qo'shish
+    function addExpense() {
+        const category = document.getElementById('exp-category').value;
+        const amount = parseFloat(document.getElementById('exp-amount').value);
+        const comment = document.getElementById('exp-comment').value.trim();
+
+        if(isNaN(amount) || !comment) return showNotify("Xarajat summasi va izohini to'ldiring!", "error");
+        
+        expenses.push({ category, amount, comment });
+        showNotify("Xarajat muvaffaqiyatli qayd etildi!");
+        updateDashboard();
+
+        document.getElementById('exp-amount').value = ''; document.getElementById('exp-comment').value = '';
+    }
+
+    // O'chirish funksiyalari
+    function deleteProduct(index) {
+        if(confirm("Ushbu elementni ro'yxatdan o'chirmoqchimisiz?")) {
+            inventory.splice(index, 1);
+            updateDashboard();
+        }
+    }
+
+    function deleteStaff(index) {
+        if(confirm("Ushbu xodimni tizimdan o'chirmoqchimisiz?")) {
+            staffList.splice(index, 1);
+            updateDashboard();
+        }
+    }
+
+    function deleteExpense(index) {
+        if(confirm("Ushbu xarajatni o'chirmoqchimisiz?")) {
+            expenses.splice(index, 1);
+            updateDashboard();
+        }
+    }
+
+    // Tizimni ilk bor ishga tushirish
+    applyBusinessTheme();
+    updateDashboard();
+</script>
+
+</body>
+</html>
